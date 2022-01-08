@@ -8,8 +8,8 @@ import time
 import os
 import sys
 
-async def check_config():
-    debug_db = await fetch.one("config", 'name', 'DEBUG')
+def check_config():
+    debug_db = fetch.one("config", 'name', 'DEBUG')
     debug_data = json.loads(debug_db)
     if debug_data['value'] == 'TRUE':
         return True
@@ -30,7 +30,7 @@ class debug(commands.Cog):
 
     @commands.command()
     async def abc_hello(self, ctx):
-        if await check_config():
+        if check_config():
             await ctx.reply('Hello <@{user}> ! \nHow r u today? \n'.format(user=ctx.author.id), mention_author=True)
         else:
             await ctx.reply("Fitur debug pada bot ini sedang dimatikan oleh developer.", delete_after=7)
