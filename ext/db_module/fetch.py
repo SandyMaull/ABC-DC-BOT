@@ -1,16 +1,19 @@
 import mysql.connector
 from ext.db_module import connection
 import json
+import asyncio
 
-
-def one(table, field, value):
+async def one(table, field, value):
     db = connection.connect()
     cursor = db.cursor()
     sql = "SELECT * FROM {table} WHERE {field} = '{value}'".format(table = table, field = field, value = value)
     try:
-        cursor.execute(sql)
-        data = cursor.description
-        result = cursor.fetchone()
+        exec_com = lambda: cursor.execute(sql)
+        data = lambda: cursor.description
+        result = lambda: cursor.fetchone()
+        exec_com = await asyncio.to_thread(exec_com)
+        data = await asyncio.to_thread(data)
+        result = await asyncio.to_thread(result)
         i = 0
         column_name = {}
         while i < len(data):
