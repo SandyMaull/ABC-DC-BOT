@@ -9,12 +9,22 @@ import sys
 from random import shuffle
 from youtube_dl import YoutubeDL
 
-def checkdata():
+def checkdata(check_dev_id):
     music_db = fetch.one("config", 'name', 'MUSIC')
     music_data = json.loads(music_db)
+
+    dev_db = fetch.all('developer')
+    dev_data = json.loads(dev_db)
+    dev_id = []
+    for i in range(len(dev_data)):
+        dev_id.append(int(dev_data["{i}".format(i = i)]["dev_id"]))
+
     if music_data['value'] == 'TRUE':
         return True
     else:
+        print(check_dev_id)
+        if check_dev_id in dev_id :
+            return True
         return False
 
 def checkchannel():
@@ -36,7 +46,7 @@ class Music(commands.Cog):
         self.music_queue = []
         self.skip_votes = set()
 
-        self.YDL_OPTIONS = {"format": "bestaudio", "noplaylist": "True"}
+        self.YDL_OPTIONS = {"format": "bestaudio/best", "noplaylist": "True"}
         self.FFMPEG_OPTIONS = {
             "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
             "options": "-vn",
@@ -59,12 +69,15 @@ class Music(commands.Cog):
             while True:
                 await asyncio.sleep(1)
                 time = time + 1
-                if voice.is_playing:
-                    time = 0
-                if time == 20:
-                    await voice.disconnect()
-                if not voice.is_connected():
-                    break
+                try:
+                    if voice.is_playing:
+                        time = 0
+                    if time == 20:
+                        await voice.disconnect()
+                    if not voice.is_connected():
+                        break
+                except:
+                    continue
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
@@ -77,10 +90,14 @@ class Music(commands.Cog):
 
     def search_yt(self, item):
         with YoutubeDL(self.YDL_OPTIONS) as ydl:
+            # info2 = ydl.extract_info("ytsearch:%s" % item, download=False)
+            # print("info2: ", info2)
+            # return False
             try:
                 info = ydl.extract_info("ytsearch:%s" % item, download=False)[
                     "entries"
                 ][0]
+                
             except Exception:
                 return False
         return {
@@ -117,7 +134,7 @@ class Music(commands.Cog):
                 await self.vc.move_to(self.music_queue[0][1])
 
             await ctx.reply(
-                f""":arrow_forward: Playing **{self.music_queue[0][0]['title']}** -- requested by {self.music_queue[0][2]}""", delete_after=5, mention_author=False
+                f""":arrow_forward: Playing **{self.music_queue[0][0]['title']}** -- requested by {self.music_queue[0][2]}""", mention_author=False
             )
 
             self.vc.play(
@@ -140,7 +157,7 @@ class Music(commands.Cog):
         if ctx.prefix != '!1':
             return
 
-        if checkdata() != True:
+        if checkdata(ctx.author.id) != True:
             await ctx.reply("Fitur music pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
@@ -153,6 +170,10 @@ class Music(commands.Cog):
         if voice_channel is None:
             await ctx.reply("Connect to a voice channel!", delete_after=5, mention_author=False)
         else:
+            if ctx.voice_client:
+                if ctx.voice_client.channel != ctx.author.voice.channel:
+                    await ctx.reply("You're not in same voice with bot, not executing...", delete_after=5, mention_author=False)
+                    return
             song = self.search_yt(query)
             if type(song) == type(True):
                 await ctx.reply(
@@ -176,7 +197,7 @@ class Music(commands.Cog):
         if ctx.prefix != '!1':
             return
 
-        if checkdata() != True:
+        if checkdata(ctx.author.id) != True:
             await ctx.reply("Fitur music pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
@@ -201,7 +222,7 @@ class Music(commands.Cog):
         if ctx.prefix != '!1':
             return
 
-        if checkdata() != True:
+        if checkdata(ctx.author.id) != True:
             await ctx.reply("Fitur music pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
@@ -209,15 +230,14 @@ class Music(commands.Cog):
             await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#796774901285388288>\n\nTerima Kasih Atas Pengertiannya.", delete_after=7)
             return
 
-        print(self.music_queue)
         retval = ""
         for (i, m) in enumerate(self.music_queue):
             retval += f"""{i+1}. **{m[0]['title']}** -- added by {m[int(2)]}\n"""
 
         if retval != "":
-            await ctx.reply(retval, delete_after=5, mention_author=False)
+            await ctx.reply(retval, mention_author=False)
         else:
-            await ctx.reply("No music in queue", delete_after=5, mention_author=False)
+            await ctx.reply("No music in queue", mention_author=False)
 
     @commands.command(name="cq", help="Clears the queue.", aliases=["clear"])
     async def cq(self, ctx):
@@ -225,7 +245,7 @@ class Music(commands.Cog):
         if ctx.prefix != '!1':
             return
 
-        if checkdata() != True:
+        if checkdata(ctx.author.id) != True:
             await ctx.reply("Fitur music pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
@@ -242,7 +262,7 @@ class Music(commands.Cog):
         if ctx.prefix != '!1':
             return
 
-        if checkdata() != True:
+        if checkdata(ctx.author.id) != True:
             await ctx.reply("Fitur music pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
@@ -261,7 +281,7 @@ class Music(commands.Cog):
         if ctx.prefix != '!1':
             return
 
-        if checkdata() != True:
+        if checkdata(ctx.author.id) != True:
             await ctx.reply("Fitur music pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
@@ -285,7 +305,7 @@ class Music(commands.Cog):
         if ctx.prefix != '!1':
             return
 
-        if checkdata() != True:
+        if checkdata(ctx.author.id) != True:
             await ctx.reply("Fitur music pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
@@ -312,7 +332,7 @@ class Music(commands.Cog):
         if ctx.prefix != '!1':
             return
 
-        if checkdata() != True:
+        if checkdata(ctx.author.id) != True:
             await ctx.reply("Fitur music pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
@@ -332,7 +352,7 @@ class Music(commands.Cog):
         if ctx.prefix != '!1':
             return
 
-        if checkdata() != True:
+        if checkdata(ctx.author.id) != True:
             await ctx.reply("Fitur music pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
@@ -394,7 +414,7 @@ class Music(commands.Cog):
         if ctx.prefix != '!1':
             return
 
-        if checkdata() != True:
+        if checkdata(ctx.author.id) != True:
             await ctx.reply("Fitur music pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
@@ -418,7 +438,7 @@ class Music(commands.Cog):
         if ctx.prefix != '!1':
             return
 
-        if checkdata() != True:
+        if checkdata(ctx.author.id) != True:
             await ctx.reply("Fitur music pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
@@ -446,7 +466,7 @@ class Music(commands.Cog):
         if ctx.prefix != '!1':
             return
 
-        if checkdata() != True:
+        if checkdata(ctx.author.id) != True:
             await ctx.reply("Fitur music pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
@@ -487,7 +507,7 @@ class Music(commands.Cog):
         if ctx.prefix != '!1':
             return
 
-        if checkdata() != True:
+        if checkdata(ctx.author.id) != True:
             await ctx.reply("Fitur music pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
@@ -537,7 +557,7 @@ class Music(commands.Cog):
         if ctx.prefix != '!1':
             return
 
-        if checkdata() != True:
+        if checkdata(ctx.author.id) != True:
             await ctx.reply("Fitur music pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
@@ -563,7 +583,7 @@ class Music(commands.Cog):
         if ctx.prefix != '!1':
             return
 
-        if checkdata() != True:
+        if checkdata(ctx.author.id) != True:
             await ctx.reply("Fitur music pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
