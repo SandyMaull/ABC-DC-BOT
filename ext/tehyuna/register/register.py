@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands
 import traceback
 import json
-from ext.db_module import fetch
+from ext.db_module import fetch, insert
 import sys
 import requests
 import urllib
@@ -11,22 +11,24 @@ import urllib
 from random import shuffle
 from youtube_dl import YoutubeDL
 
-def checkdata():
-    regis_db = fetch.one("config", 'name', 'REGISTER')
+def checkdata(guild_id):
+    regis_db = fetch.one(guild_id, "config", 'name', 'REGISTER')
     regis_data = json.loads(regis_db)
     if regis_data['value'] == 'TRUE':
         return True
     else:
+        
         return False
 
-def checkchannel():
-    get_channel = fetch.many("allow_channel", 'name', 'Register')
+def checkchannel(guild_id):
+    get_channel = fetch.many(guild_id, "allow_channel", 'name', 'Register')
     channel_data = json.loads(get_channel)
     list_channel_allow = []
     for i in range(len(channel_data)):
         looping = '{i}'.format(i = i)
         list_channel_allow.append(int(channel_data[looping]['channel_id']))
     return list_channel_allow
+    
 
 class Register(commands.Cog):
     def __init__(self, bot):
@@ -40,9 +42,51 @@ class Register(commands.Cog):
     async def on_command_error(self, ctx, error):
         if isinstance(error, commands.errors.CheckFailure):
             pass
+        elif isinstance(error, commands.errors.CommandInvokeError):
+            await ctx.reply("Something Error, Check BOT Permission.", delete_after=7)
+            return
+        elif isinstance(error, commands.errors.MemberNotFound):
+            await ctx.reply("Something Error, User Not Found.", delete_after=7)
+            return
         else:
             print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
             traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
+    
+    # @commands.command(
+    #     name="dreg",
+    #     help="*Register khusus untuk dev, contoh: -dreg [Mention yg ingin di register] [nickname]",
+    #     aliases=["devregister"],
+    # )
+    # @commands.has_permissions(manage_nicknames=True)
+    # async def dreg(self, ctx, m: discord.Member, *args):
+        # if ctx.prefix != '-':
+        #     return
+
+        # if checkdata() != True:
+        #     await ctx.reply("Fitur register pada bot ini sedang dimatikan oleh developer.", delete_after=7)
+        #     return
+
+        # if ctx.channel.id not in checkchannel() and "ticket" not in ctx.channel.name:
+        #     await ctx.reply("Bot hanya bisa digunakan di channel `ticket-xxxx`\n\nTerima Kasih Atas Pengertiannya.", delete_after=7)
+        #     return
+        # print(insert.history("('Test', 'Test', 'Test')"))
+        # guild_db = fetch.one("guild", 'guild_id', '787698443442323476')
+        # guild_data = json.loads(guild_db)
+        
+        # if len(args) == 1:
+        #     nickname = args[0]
+        #     tguild = "-"
+        #     rename = (f"[{tguild}] {nickname}")
+        #     role = discord.utils.get(ctx.guild.roles, id=int(guild_data['visitorrole']))
+        #     await ctx.channel.trigger_typing()
+            
+        # elif len(args) == 2:
+        # else:
+        #     await ctx.reply("Parameter Invalid, use `-rh` for help.", delete_after=7)
+        #     return
+
+        # await m.edit(nick=args)
+
 
     @commands.command(
         name="reg",
@@ -54,15 +98,15 @@ class Register(commands.Cog):
         if ctx.prefix != '-':
             return
 
-        if checkdata() != True:
+        if checkdata(ctx.guild.id) != True:
             await ctx.reply("Fitur register pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
-        if ctx.channel.id not in checkchannel() and "ticket" not in ctx.channel.name:
+        if ctx.channel.id not in checkchannel(ctx.guild.id) and "ticket" not in ctx.channel.name:
             await ctx.reply("Bot hanya bisa digunakan di channel `ticket-xxxx`\n\nTerima Kasih Atas Pengertiannya.", delete_after=7)
             return
 
-        guild_db = fetch.one("guild", 'guild_id', '787698443442323476')
+        guild_db = fetch.one(ctx.guild.id, "guild", 'guild_id', '787698443442323476')
         guild_data = json.loads(guild_db)
         if len(args) == 1:
             nickname = args[0]
@@ -100,7 +144,7 @@ class Register(commands.Cog):
                     tguild = "ABC"
                 else:
                     role = discord.utils.get(ctx.guild.roles, id=int(guild_data['visitorrole']))
-                    alias_db = fetch.all("guild_alias")
+                    alias_db = fetch.all(ctx.guild.id, "guild_alias")
                     alias_data = json.loads(alias_db)
                     alias_exist = False
                     for i in range(len(alias_data)):

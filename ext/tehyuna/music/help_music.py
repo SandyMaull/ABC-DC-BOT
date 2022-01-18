@@ -5,22 +5,27 @@ import traceback
 import json
 from ext.db_module import fetch
 
-def checkdata():
-    music_db = fetch.one("config", 'name', 'MUSIC')
+def checkdata(guild_id):
+    music_db = fetch.one(guild_id, "config", 'name', 'MUSIC')
     music_data = json.loads(music_db)
     if music_data['value'] == 'TRUE':
         return True
     else:
         return False
 
-def checkchannel():
-    get_channel = fetch.many("allow_channel", 'name', 'Music')
+def checkchannel(guild_id):
+    get_channel = fetch.many(guild_id, "allow_channel", 'name', 'Music')
     channel_data = json.loads(get_channel)
     list_channel_allow = []
     for i in range(len(channel_data)):
         looping = '{i}'.format(i = i)
         list_channel_allow.append(int(channel_data[looping]['channel_id']))
     return list_channel_allow
+
+def defaultchannel(guild_id):
+    music_db = fetch.one(guild_id, "allow_channel", 'name', 'Default-Music')
+    music_data = json.loads(music_db)
+    return music_data['channel_id']
 
 class Help_Music(commands.Cog):
     """Cog for the help command."""
@@ -48,12 +53,13 @@ class Help_Music(commands.Cog):
         if ctx.prefix != '!1':
             return
             
-        if checkdata() != True:
+        if checkdata(ctx.guild.id) != True:
             await ctx.reply("Fitur music pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
-        if ctx.channel.id not in checkchannel():
-            await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#796774901285388288>\n\nTerima Kasih Atas Pengertiannya.", delete_after=7)
+        if ctx.channel.id not in checkchannel(ctx.guild.id):
+            dc = int(defaultchannel(ctx.guild.id))
+            await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#{dc}>\n\nTerima Kasih Atas Pengertiannya.".format(dc = dc), delete_after=7)
             return
 
         try:

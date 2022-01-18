@@ -9,16 +9,16 @@ import json
 import os
 import requests
 
-def checkdata():
-    albion_db = fetch.one("config", 'name', 'ALBION')
+def checkdata(guild_id):
+    albion_db = fetch.one(guild_id, "config", 'name', 'ALBION')
     albion_data = json.loads(albion_db)
     if albion_data['value'] == 'TRUE':
         return True
     else:
         return False
 
-def checkchannel():
-    get_channel = fetch.many("allow_channel", 'name', 'Albion_Item')
+def checkchannel(guild_id):
+    get_channel = fetch.many(guild_id, "allow_channel", 'name', 'Albion_Item')
     channel_data = json.loads(get_channel)
     list_channel_allow = []
     for i in range(len(channel_data)):
@@ -109,11 +109,11 @@ class item(commands.Cog):
     @commands.command()
     async def se(self, ctx, *, arg):
 
-        if checkdata() != True:
+        if checkdata(ctx.guild.id) != True:
             await ctx.reply("Fitur albion pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
-        if ctx.channel.id not in checkchannel():
+        if ctx.channel.id not in checkchannel(ctx.guild.id):
             await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#804656940436160512>\n\nTerima Kasih Atas Pengertiannya.", delete_after=7)
             return
 
@@ -158,16 +158,16 @@ class item(commands.Cog):
     @commands.command()
     async def search(self, ctx, *arg):
 
-        if checkdata() != True:
+        if checkdata(ctx.guild.id) != True:
             await ctx.reply("Fitur albion pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
-        if ctx.channel.id not in checkchannel():
+        if ctx.channel.id not in checkchannel(ctx.guild.id):
             await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#804656940436160512>\n\nTerima Kasih Atas Pengertiannya.", delete_after=7)
             return
 
         if len(arg) >= 2:
-            albion_db = fetch.one("alias", 'name', arg[1])
+            albion_db = fetch.one(ctx.guild.id, "alias", 'name', arg[1])
             if albion_db:
                 print(albion_db)
 

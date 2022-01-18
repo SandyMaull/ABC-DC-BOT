@@ -9,11 +9,10 @@ import sys
 from random import shuffle
 from youtube_dl import YoutubeDL
 
-def checkdata(check_dev_id):
-    music_db = fetch.one("config", 'name', 'MUSIC')
+def checkdata(guild_id, guild_dev_id):
+    music_db = fetch.one(guild_id, "config", 'name', 'MUSIC')
     music_data = json.loads(music_db)
-
-    dev_db = fetch.all('developer')
+    dev_db = fetch.all(guild_id, 'developer')
     dev_data = json.loads(dev_db)
     dev_id = []
     for i in range(len(dev_data)):
@@ -22,19 +21,23 @@ def checkdata(check_dev_id):
     if music_data['value'] == 'TRUE':
         return True
     else:
-        print(check_dev_id)
-        if check_dev_id in dev_id :
+        if guild_dev_id in dev_id :
             return True
         return False
 
-def checkchannel():
-    get_channel = fetch.many("allow_channel", 'name', 'Music')
+def checkchannel(guild_id):
+    get_channel = fetch.many(guild_id, "allow_channel", 'name', 'Music')
     channel_data = json.loads(get_channel)
     list_channel_allow = []
     for i in range(len(channel_data)):
         looping = '{i}'.format(i = i)
         list_channel_allow.append(int(channel_data[looping]['channel_id']))
     return list_channel_allow
+
+def defaultchannel(guild_id):
+    music_db = fetch.one(guild_id, "allow_channel", 'name', 'Default-Music')
+    music_data = json.loads(music_db)
+    return music_data['channel_id']
 
 class Music(commands.Cog):
     def __init__(self, bot):
@@ -46,7 +49,7 @@ class Music(commands.Cog):
         self.music_queue = []
         self.skip_votes = set()
 
-        self.YDL_OPTIONS = {"format": "bestaudio/best", "noplaylist": "True"}
+        self.YDL_OPTIONS = {"format": "bestaudio/best", "yesplaylist": "True"}
         self.FFMPEG_OPTIONS = {
             "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
             "options": "-vn",
@@ -90,7 +93,8 @@ class Music(commands.Cog):
 
     def search_yt(self, item):
         with YoutubeDL(self.YDL_OPTIONS) as ydl:
-            # info2 = ydl.extract_info("ytsearch:%s" % item, download=False)
+            ydl.cache.remove()
+            # info2 = ydl.extract_info("ytsearch:%s" % item, download=False)["entries"]
             # print("info2: ", info2)
             # return False
             try:
@@ -147,6 +151,28 @@ class Music(commands.Cog):
             self.is_playing = False
             self.current_song = None
 
+    # @commands.command(
+    #     name="p",
+    #     help="Plays a selected song from youtube.",
+    #     aliases=["play"],
+    # )
+    # async def p(self, ctx, *args):
+    #     if ctx.prefix != '!1':
+    #         return
+
+    #     if checkdata(ctx.guild.id, ctx.author.id) != True:
+    #         await ctx.reply("Fitur music pada bot ini sedang dimatikan oleh developer.", delete_after=7)
+    #         return
+
+    #     if ctx.channel.id not in checkchannel(ctx.guild.id):
+    #         dc = int(defaultchannel(ctx.guild.id))
+    #         print(dc)
+    #         await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#{dc}>\n\nTerima Kasih Atas Pengertiannya.".format(dc = dc), delete_after=7)
+    #         return
+        
+    #     query = " ".join(args)
+    #     song = self.search_yt(query)
+
     @commands.command(
         name="p",
         help="Plays a selected song from youtube.",
@@ -157,12 +183,14 @@ class Music(commands.Cog):
         if ctx.prefix != '!1':
             return
 
-        if checkdata(ctx.author.id) != True:
+        if checkdata(ctx.guild.id, ctx.author.id) != True:
             await ctx.reply("Fitur music pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
-        if ctx.channel.id not in checkchannel():
-            await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#796774901285388288>\n\nTerima Kasih Atas Pengertiannya.", delete_after=7)
+        if ctx.channel.id not in checkchannel(ctx.guild.id):
+            dc = int(defaultchannel(ctx.guild.id))
+            print(dc)
+            await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#{dc}>\n\nTerima Kasih Atas Pengertiannya.".format(dc = dc), delete_after=7)
             return
 
         query = " ".join(args)
@@ -197,12 +225,14 @@ class Music(commands.Cog):
         if ctx.prefix != '!1':
             return
 
-        if checkdata(ctx.author.id) != True:
+        if checkdata(ctx.guild.id, ctx.author.id) != True:
             await ctx.reply("Fitur music pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
-        if ctx.channel.id not in checkchannel():
-            await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#796774901285388288>\n\nTerima Kasih Atas Pengertiannya.", delete_after=7)
+        if ctx.channel.id not in checkchannel(ctx.guild.id):
+            dc = int(defaultchannel(ctx.guild.id))
+            print(dc)
+            await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#{dc}>\n\nTerima Kasih Atas Pengertiannya.".format(dc = dc), delete_after=7)
             return
 
         msg = (
@@ -222,12 +252,14 @@ class Music(commands.Cog):
         if ctx.prefix != '!1':
             return
 
-        if checkdata(ctx.author.id) != True:
+        if checkdata(ctx.guild.id, ctx.author.id) != True:
             await ctx.reply("Fitur music pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
-        if ctx.channel.id not in checkchannel():
-            await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#796774901285388288>\n\nTerima Kasih Atas Pengertiannya.", delete_after=7)
+        if ctx.channel.id not in checkchannel(ctx.guild.id):
+            dc = int(defaultchannel(ctx.guild.id))
+            print(dc)
+            await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#{dc}>\n\nTerima Kasih Atas Pengertiannya.".format(dc = dc), delete_after=7)
             return
 
         retval = ""
@@ -245,12 +277,14 @@ class Music(commands.Cog):
         if ctx.prefix != '!1':
             return
 
-        if checkdata(ctx.author.id) != True:
+        if checkdata(ctx.guild.id, ctx.author.id) != True:
             await ctx.reply("Fitur music pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
-        if ctx.channel.id not in checkchannel():
-            await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#796774901285388288>\n\nTerima Kasih Atas Pengertiannya.", delete_after=7)
+        if ctx.channel.id not in checkchannel(ctx.guild.id):
+            dc = int(defaultchannel(ctx.guild.id))
+            print(dc)
+            await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#{dc}>\n\nTerima Kasih Atas Pengertiannya.".format(dc = dc), delete_after=7)
             return
 
         self.music_queue = []
@@ -262,12 +296,14 @@ class Music(commands.Cog):
         if ctx.prefix != '!1':
             return
 
-        if checkdata(ctx.author.id) != True:
+        if checkdata(ctx.guild.id, ctx.author.id) != True:
             await ctx.reply("Fitur music pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
-        if ctx.channel.id not in checkchannel():
-            await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#796774901285388288>\n\nTerima Kasih Atas Pengertiannya.", delete_after=7)
+        if ctx.channel.id not in checkchannel(ctx.guild.id):
+            dc = int(defaultchannel(ctx.guild.id))
+            print(dc)
+            await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#{dc}>\n\nTerima Kasih Atas Pengertiannya.".format(dc = dc), delete_after=7)
             return
 
         shuffle(self.music_queue)
@@ -281,12 +317,14 @@ class Music(commands.Cog):
         if ctx.prefix != '!1':
             return
 
-        if checkdata(ctx.author.id) != True:
+        if checkdata(ctx.guild.id, ctx.author.id) != True:
             await ctx.reply("Fitur music pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
-        if ctx.channel.id not in checkchannel():
-            await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#796774901285388288>\n\nTerima Kasih Atas Pengertiannya.", delete_after=7)
+        if ctx.channel.id not in checkchannel(ctx.guild.id):
+            dc = int(defaultchannel(ctx.guild.id))
+            print(dc)
+            await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#{dc}>\n\nTerima Kasih Atas Pengertiannya.".format(dc = dc), delete_after=7)
             return
 
         if self.vc != "" and self.vc:
@@ -305,12 +343,14 @@ class Music(commands.Cog):
         if ctx.prefix != '!1':
             return
 
-        if checkdata(ctx.author.id) != True:
+        if checkdata(ctx.guild.id, ctx.author.id) != True:
             await ctx.reply("Fitur music pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
-        if ctx.channel.id not in checkchannel():
-            await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#796774901285388288>\n\nTerima Kasih Atas Pengertiannya.", delete_after=7)
+        if ctx.channel.id not in checkchannel(ctx.guild.id):
+            dc = int(defaultchannel(ctx.guild.id))
+            print(dc)
+            await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#{dc}>\n\nTerima Kasih Atas Pengertiannya.".format(dc = dc), delete_after=7)
             return
 
         if ctx.voice_client is None:
@@ -332,12 +372,14 @@ class Music(commands.Cog):
         if ctx.prefix != '!1':
             return
 
-        if checkdata(ctx.author.id) != True:
+        if checkdata(ctx.guild.id, ctx.author.id) != True:
             await ctx.reply("Fitur music pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
-        if ctx.channel.id not in checkchannel():
-            await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#796774901285388288>\n\nTerima Kasih Atas Pengertiannya.", delete_after=7)
+        if ctx.channel.id not in checkchannel(ctx.guild.id):
+            dc = int(defaultchannel(ctx.guild.id))
+            print(dc)
+            await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#{dc}>\n\nTerima Kasih Atas Pengertiannya.".format(dc = dc), delete_after=7)
             return
 
         if self.vc.is_connected():
@@ -352,12 +394,14 @@ class Music(commands.Cog):
         if ctx.prefix != '!1':
             return
 
-        if checkdata(ctx.author.id) != True:
+        if checkdata(ctx.guild.id, ctx.author.id) != True:
             await ctx.reply("Fitur music pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
-        if ctx.channel.id not in checkchannel():
-            await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#796774901285388288>\n\nTerima Kasih Atas Pengertiannya.", delete_after=7)
+        if ctx.channel.id not in checkchannel(ctx.guild.id):
+            dc = int(defaultchannel(ctx.guild.id))
+            print(dc)
+            await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#{dc}>\n\nTerima Kasih Atas Pengertiannya.".format(dc = dc), delete_after=7)
             return
 
         query = " ".join(args)
@@ -414,12 +458,14 @@ class Music(commands.Cog):
         if ctx.prefix != '!1':
             return
 
-        if checkdata(ctx.author.id) != True:
+        if checkdata(ctx.guild.id, ctx.author.id) != True:
             await ctx.reply("Fitur music pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
-        if ctx.channel.id not in checkchannel():
-            await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#796774901285388288>\n\nTerima Kasih Atas Pengertiannya.", delete_after=7)
+        if ctx.channel.id not in checkchannel(ctx.guild.id):
+            dc = int(defaultchannel(ctx.guild.id))
+            print(dc)
+            await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#{dc}>\n\nTerima Kasih Atas Pengertiannya.".format(dc = dc), delete_after=7)
             return
 
         vc = ctx.voice_client
@@ -438,12 +484,14 @@ class Music(commands.Cog):
         if ctx.prefix != '!1':
             return
 
-        if checkdata(ctx.author.id) != True:
+        if checkdata(ctx.guild.id, ctx.author.id) != True:
             await ctx.reply("Fitur music pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
-        if ctx.channel.id not in checkchannel():
-            await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#796774901285388288>\n\nTerima Kasih Atas Pengertiannya.", delete_after=7)
+        if ctx.channel.id not in checkchannel(ctx.guild.id):
+            dc = int(defaultchannel(ctx.guild.id))
+            print(dc)
+            await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#{dc}>\n\nTerima Kasih Atas Pengertiannya.".format(dc = dc), delete_after=7)
             return
 
         vc = ctx.voice_client
@@ -466,12 +514,14 @@ class Music(commands.Cog):
         if ctx.prefix != '!1':
             return
 
-        if checkdata(ctx.author.id) != True:
+        if checkdata(ctx.guild.id, ctx.author.id) != True:
             await ctx.reply("Fitur music pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
-        if ctx.channel.id not in checkchannel():
-            await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#796774901285388288>\n\nTerima Kasih Atas Pengertiannya.", delete_after=7)
+        if ctx.channel.id not in checkchannel(ctx.guild.id):
+            dc = int(defaultchannel(ctx.guild.id))
+            print(dc)
+            await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#{dc}>\n\nTerima Kasih Atas Pengertiannya.".format(dc = dc), delete_after=7)
             return
 
         if len(args) == 0:
@@ -507,12 +557,14 @@ class Music(commands.Cog):
         if ctx.prefix != '!1':
             return
 
-        if checkdata(ctx.author.id) != True:
+        if checkdata(ctx.guild.id, ctx.author.id) != True:
             await ctx.reply("Fitur music pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
-        if ctx.channel.id not in checkchannel():
-            await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#796774901285388288>\n\nTerima Kasih Atas Pengertiannya.", delete_after=7)
+        if ctx.channel.id not in checkchannel(ctx.guild.id):
+            dc = int(defaultchannel(ctx.guild.id))
+            print(dc)
+            await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#{dc}>\n\nTerima Kasih Atas Pengertiannya.".format(dc = dc), delete_after=7)
             return
 
         song = []
@@ -557,12 +609,14 @@ class Music(commands.Cog):
         if ctx.prefix != '!1':
             return
 
-        if checkdata(ctx.author.id) != True:
+        if checkdata(ctx.guild.id, ctx.author.id) != True:
             await ctx.reply("Fitur music pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
-        if ctx.channel.id not in checkchannel():
-            await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#796774901285388288>\n\nTerima Kasih Atas Pengertiannya.", delete_after=7)
+        if ctx.channel.id not in checkchannel(ctx.guild.id):
+            dc = int(defaultchannel(ctx.guild.id))
+            print(dc)
+            await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#{dc}>\n\nTerima Kasih Atas Pengertiannya.".format(dc = dc), delete_after=7)
             return
 
         remaining_time = 0
@@ -583,12 +637,14 @@ class Music(commands.Cog):
         if ctx.prefix != '!1':
             return
 
-        if checkdata(ctx.author.id) != True:
+        if checkdata(ctx.guild.id, ctx.author.id) != True:
             await ctx.reply("Fitur music pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 
-        if ctx.channel.id not in checkchannel():
-            await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#796774901285388288>\n\nTerima Kasih Atas Pengertiannya.", delete_after=7)
+        if ctx.channel.id not in checkchannel(ctx.guild.id):
+            dc = int(defaultchannel(ctx.guild.id))
+            print(dc)
+            await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#{dc}>\n\nTerima Kasih Atas Pengertiannya.".format(dc = dc), delete_after=7)
             return
 
         second = int(0)

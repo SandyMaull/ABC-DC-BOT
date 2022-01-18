@@ -5,8 +5,8 @@ import traceback
 import json
 from ext.db_module import fetch
 
-def checkdata():
-    regis_db = fetch.one("config", 'name', 'REGISTER')
+def checkdata(guild_id):
+    regis_db = fetch.one(guild_id, "config", 'name', 'REGISTER')
     regis_data = json.loads(regis_db)
     if regis_data['value'] == 'TRUE':
         return True
@@ -39,7 +39,7 @@ class Help_Register(commands.Cog):
         if ctx.prefix != '-':
             return
         
-        if checkdata() != True:
+        if checkdata(ctx.guild.id) != True:
             await ctx.reply("Fitur register pada bot ini sedang dimatikan oleh developer.", delete_after=7)
             return
 

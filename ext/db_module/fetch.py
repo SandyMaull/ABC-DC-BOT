@@ -3,10 +3,15 @@ from ext.db_module import connection
 import json
 
 
-def one(table, field, value):
+def one(guild_id, table, field, value):
     db = connection.connect()
     cursor = db.cursor()
-    sql = "SELECT * FROM {table} WHERE {field} = '{value}'".format(table = table, field = field, value = value)
+    guild_id = str(guild_id)
+    if table != 'guild':
+        sql = "SELECT {table}.* FROM {table} INNER JOIN guild ON guild.guild_id = '{guild_id}' AND {table}.guild_id = guild.id AND {table}.{field} = '{value}'".format(guild_id = guild_id, table = table, field = field, value = value)
+    else:
+        sql = "SELECT * FROM {table} WHERE {field} = '{value}'".format(table = table, field = field, value = value)
+    # print(sql)
     try:
         cursor.execute(sql)
         data = cursor.description
@@ -20,10 +25,12 @@ def one(table, field, value):
     except:
         return False
 
-def many(table, field, value):
+def many(guild_id, table, field, value):
     db = connection.connect()
     cursor = db.cursor()
-    sql = "SELECT * FROM {table} WHERE {field} = '{value}'".format(table = table, field = field, value = value)
+    guild_id = str(guild_id)
+    sql = "SELECT {table}.* FROM {table} INNER JOIN guild ON guild.guild_id = '{guild_id}' AND {table}.guild_id = guild.id AND {table}.{field} = '{value}'".format(guild_id = guild_id, table = table, field = field, value = value)
+    # print(sql)
     try:
         cursor.execute(sql)
         data = cursor.description
@@ -42,10 +49,12 @@ def many(table, field, value):
     except:
         return False
 
-def all(table):
+def all(guild_id, table):
     db = connection.connect()
     cursor = db.cursor()
-    sql = "SELECT * FROM {table}".format(table = table)
+    guild_id = str(guild_id)
+    sql = "SELECT {table}.* FROM {table} INNER JOIN guild ON guild.guild_id = '{guild_id}' AND {table}.guild_id = guild.id".format(guild_id = guild_id, table = table)
+    # print(sql)
     try:
         cursor.execute(sql)
         data = cursor.description
@@ -63,3 +72,6 @@ def all(table):
         return json.dumps(finaldata)
     except:
         return False
+
+# print(one(665154027318804497, "config", 'name', 'MUSIC'))
+# print(one(787698443442323476, "guild", 'guild_id', '787698443442323476'))

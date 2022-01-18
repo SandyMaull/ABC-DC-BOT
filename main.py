@@ -26,6 +26,12 @@ def main():
         print("We have logged in as {0.user}".format(tehyuna))
         await tehyuna.change_presence(activity=discord.Game("Receptionist"))
 
+    # @tehyuna.event
+    # async def on_member_join(member):
+    #     channel = alfred.get_channel(790274325533378682)
+    #     embed=discord.Embed(title="Welcome!",description=f"{member.mention} Just Joined")
+    #     await channel.send(embed=embed)
+
     @tehyuli.event
     async def on_ready():
         print("We have logged in as {0.user}".format(tehyuli))
