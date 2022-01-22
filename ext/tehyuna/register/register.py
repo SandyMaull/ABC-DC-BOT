@@ -64,7 +64,7 @@ class Register(commands.Cog):
     
     @commands.command(
         name="dreg",
-        help="*Register khusus untuk dev\ncontoh yg ada IGN albion: -dreg [Mention yg ingin di register] [nickname] [IGN ALBION]\ncontoh tanpa IGN:-dreg [Mention yg ingin di register] [nickname]",
+        help="*Register khusus untuk dev\n*format yg ada IGN albion: -dreg [Mention yg ingin di register] [nickname] [IGN ALBION]\ncontoh:-dreg @TagDCMamat Mamat Invoker\n\n*format tanpa IGN:-dreg [Mention yg ingin di register] [nickname]\ncontoh: -dreg @TagDCMamat Mamat",
         aliases=["devregister"],
     )
 
