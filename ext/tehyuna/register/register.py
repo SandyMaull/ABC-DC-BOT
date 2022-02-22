@@ -79,7 +79,6 @@ class Register(commands.Cog):
         if ctx.channel.id not in checkchannel(ctx.guild.id) and "ticket" not in ctx.channel.name:
             await ctx.reply("Bot hanya bisa digunakan di channel `ticket-xxxx`\n\nTerima Kasih Atas Pengertiannya.", delete_after=7)
             return
-        print(insert.history("('Test', 'Test', 'Test')"))
         guild_db = fetch.one(ctx.guild.id, "guild", 'guild_id', '787698443442323476')
         guild_data = json.loads(guild_db)
         
@@ -159,6 +158,7 @@ class Register(commands.Cog):
         try:
             await m.edit(nick=rename)
             await m.add_roles(role)
+            insert.history("('{guild}', 'Register', '{id}', '{nick}')".format(guild = guild_data["id"], id = m.id, nick = rename))
             await ctx.reply(f'Registration Success\nYour Nickname Is `{nickname}` And You Are In Guild `[{guild}]`\nYour Nickname Changed to {m.mention}\nAnd You Get `{role}` Role')
             return
         except:
@@ -263,6 +263,7 @@ class Register(commands.Cog):
         try:
             await ctx.author.edit(nick=rename)
             await ctx.author.add_roles(role)
+            insert.history("('{guild}', 'Register', '{id}', '{nick}')".format(guild = guild_data["id"], id = ctx.author.id, nick = rename))
             await ctx.reply(f'Registration Success\nYour Nickname Is `{nickname}` And You Are In Guild `[{guild}]`\nYour Nickname Changed to {ctx.message.author.mention}\nAnd You Get `{role}` Role')
             return
         except:

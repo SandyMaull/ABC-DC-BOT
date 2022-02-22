@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from discord_components import DiscordComponents, Button, ButtonStyle
+from table2ascii import table2ascii as t2a, PresetStyle
 from ext.db_module import fetch
 from ext.db_module import update
 import json
@@ -24,6 +25,11 @@ def developer_check(guild_id):
         dev_id.append(int(dev_data["{i}".format(i = i)]["dev_id"]))
     return dev_id
 
+def history_check(guild_id):
+    h_db = fetch.all(guild_id, 'history')
+    h_data = json.loads(h_db)
+    return h_data
+
 class debug(commands.Cog):
     def __init__(self, client):
         self.client = client
@@ -42,6 +48,24 @@ class debug(commands.Cog):
             message = await ctx.reply("Pong!")
             ping = (time.monotonic() - before) * 1000
             await message.edit(content=f"Pong!, avr Ping is `{int(ping)}ms` for last 1-5 second interval")
+        else:
+            await ctx.reply("Fitur debug pada bot ini sedang dimatikan oleh developer.", delete_after=7)
+
+    @commands.command()
+    async def history(self, ctx):
+        if check_config(ctx.guild.id):
+            data = history_check(ctx.guild.id)
+            header_final = ['type', 'name', 'value']
+            data_final = []
+            for i in range(len(data)):
+                data_temp = ['{typed}'.format(typed = data['{i}'.format(i = i)]['type']), '{name}'.format(name = await ctx.guild.fetch_member(data['{i}'.format(i = i)]['name'])), '{value}'.format(value = data['{i}'.format(i = i)]['value'])]
+                data_final.append(data_temp)
+            output_final = t2a(
+                header=header_final,
+                body=data_final,
+                style=PresetStyle.ascii_minimalist
+            )
+            await ctx.reply(f"```\n{output_final}\n```")
         else:
             await ctx.reply("Fitur debug pada bot ini sedang dimatikan oleh developer.", delete_after=7)
 
