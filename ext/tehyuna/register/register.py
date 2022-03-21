@@ -114,6 +114,7 @@ class Register(commands.Cog):
                 guild = player['GuildName']
                 if guild == "":
                     tguild = '-'
+                    role = discord.utils.get(ctx.guild.roles, id=int(guild_data['visitorrole']))
                 elif guild == guild_data['name']:
                     role = discord.utils.get(ctx.guild.roles, id=int(guild_data['memberrole']))
                     tguild = "ABC"
@@ -219,6 +220,7 @@ class Register(commands.Cog):
                 guild = player['GuildName']
                 if guild == "":
                     tguild = '-'
+                    role = discord.utils.get(ctx.guild.roles, id=int(guild_data['visitorrole']))
                 elif guild == guild_data['name']:
                     role = discord.utils.get(ctx.guild.roles, id=int(guild_data['memberrole']))
                     tguild = "ABC"
