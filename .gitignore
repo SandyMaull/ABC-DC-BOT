@@ -3,3 +3,8 @@ Lib
 Scripts
 pyvenv.cfg
 .env
+bin
+lib
+lib64
+share
+include
