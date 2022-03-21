@@ -21,33 +21,33 @@ def SearchEngine(item):
         try:
             datainput = datasortraw[i][2] + " - [" + datasortraw[i][1] + "]"
             filterdata = [
-                "@1",
-                "@2",
-                "@3",
-                "Beginner's ",
-                "Novice's ",
-                "Journeyman's ",
-                "Adept's ",
-                "Expert's ",
-                "Master's ",
-                "Grandmaster's ",
-                "Elder's ",
-                "Beginner ",
-                "Novice ",
-                "Journeyman ",
-                "Adept ",
-                "Expert ",
-                "Master ",
-                "Grandmaster ",
-                "Elder ",
-                "T1_",
-                "T2_",
-                "T3_",
-                "T4_",
-                "T5_",
-                "T6_",
-                "T7_",
-                "T8_"
+                # "@1",
+                # "@2",
+                # "@3",
+                # "Beginner's ",
+                # "Novice's ",
+                # "Journeyman's ",
+                # "Adept's ",
+                # "Expert's ",
+                # "Master's ",
+                # "Grandmaster's ",
+                # "Elder's ",
+                # "Beginner ",
+                # "Novice ",
+                # "Journeyman ",
+                # "Adept ",
+                # "Expert ",
+                # "Master ",
+                # "Grandmaster ",
+                # "Elder ",
+                # "T1_",
+                # "T2_",
+                # "T3_",
+                # "T4_",
+                # "T5_",
+                # "T6_",
+                # "T7_",
+                # "T8_"
             ]
             for i in range(len(filterdata)):
                 if search(filterdata[i], datainput):
@@ -69,6 +69,7 @@ def SearchUniqueName(item):
         else:
             data_ret = False
             continue
+    print(data_ret)
     return data_ret
 
 def getrawfromAPI(unique_name):

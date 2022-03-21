@@ -178,6 +178,7 @@ class item(commands.Cog):
                     if return_var == False:
                         joinarg = ' '.join(arg)
                         data = sort_item.SearchEngine(joinarg)
+                        print(data)
                         paginationList = search_components(joinarg, data)
                         current = 0
                         mainMessage = await ctx.reply(
@@ -359,11 +360,11 @@ class item(commands.Cog):
                             [
                             self.client.components_manager.add_callback(
                                 Button(style=ButtonStyle.red, label="Masterpiece", custom_id="masterpiece"), callbackmasterpiece
-                            ),
-                            self.client.components_manager.add_callback(
-                                Button(style=ButtonStyle.gray, label="All Quality", custom_id="allqual"), callbackmasterpiece
-                            )]
-                        ]
+                            )
+                            # self.client.components_manager.add_callback(
+                            #     Button(style=ButtonStyle.gray, label="All Quality", custom_id="allqual"), callbackmasterpiece
+                            # )
+                        ]]
 
                         await ctx.send(
                             "Pilih Kualitas:",
@@ -476,6 +477,15 @@ class item(commands.Cog):
             await ctx.reply("Parameter input salah, `?/albion_help` untuk check perintah dan parameternya")
 
 
+    @commands.command()
+    async def new(self, ctx, *arg):
+        if checkdata(ctx.guild.id) != True:
+            await ctx.reply("Fitur albion pada bot ini sedang dimatikan oleh developer.", delete_after=7)
+            return
+
+        if ctx.channel.id not in checkchannel(ctx.guild.id):
+            await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#804656940436160512>\n\nTerima Kasih Atas Pengertiannya.", delete_after=7)
+            return
 
 def setup(client):
     client.add_cog(item(client))

@@ -155,16 +155,17 @@ class Register(commands.Cog):
         else:
             print(f"{m.name} has no role for removing")
 
-        try:
-            await m.edit(nick=rename)
-            await m.add_roles(role)
-            insert.history("('{guild}', 'Register', '{id}', '{nick}')".format(guild = guild_data["id"], id = m.id, nick = rename))
-            await ctx.reply(f'Registration Success\nYour Nickname Is `{nickname}` And You Are In Guild `[{guild}]`\nYour Nickname Changed to {m.mention}\nAnd You Get `{role}` Role')
-            return
-        except:
-            helpers = discord.utils.get(ctx.guild.roles, name='Helpers')
-            await ctx.reply(f"Something Error Happening :(\n\nplease check the role, make sure to clean up before register or re-register.\ncontact `{helpers}` if you need assistance.")
-            return
+        # try:
+        await m.edit(nick=rename)
+        print(role)
+        await m.add_roles(role)
+        insert.history("('{guild}', 'Register', '{id}', '{nick}')".format(guild = guild_data['id'], id = m.id, nick = rename))
+        await ctx.reply(f'Registration Success\nYour Nickname Is `{nickname}` And You Are In Guild `[{guild}]`\nYour Nickname Changed to {m.mention}\nAnd You Get `{role}` Role')
+        return
+        # except:
+        #     helpers = discord.utils.get(ctx.guild.roles, name='Helpers')
+        #     await ctx.reply(f"Something Error Happening :(\n\nplease check the role, make sure to clean up before register or re-register.\ncontact `{helpers}` if you need assistance.")
+        #     return
 
 
     @commands.command(
@@ -260,16 +261,17 @@ class Register(commands.Cog):
         else:
             print(f"{ctx.author.name} has no role for removing")
 
-        try:
-            await ctx.author.edit(nick=rename)
-            await ctx.author.add_roles(role)
-            insert.history("('{guild}', 'Register', '{id}', '{nick}')".format(guild = guild_data["id"], id = ctx.author.id, nick = rename))
-            await ctx.reply(f'Registration Success\nYour Nickname Is `{nickname}` And You Are In Guild `[{guild}]`\nYour Nickname Changed to {ctx.message.author.mention}\nAnd You Get `{role}` Role')
-            return
-        except:
-            helpers = discord.utils.get(ctx.guild.roles, name='Helpers')
-            await ctx.reply(f"Something Error Happening :(\n\nplease check the role, make sure to clean up before register or re-register.\ncontact `{helpers}` if you need assistance.")
-            return
+        # try:
+        await ctx.author.edit(nick=rename)
+        print(role)
+        await ctx.author.add_roles(role)
+        insert.history("('{guild}', 'Register', '{id}', '{nick}')".format(guild = guild_data["id"], id = ctx.author.id, nick = rename))
+        await ctx.reply(f'Registration Success\nYour Nickname Is `{nickname}` And You Are In Guild `[{guild}]`\nYour Nickname Changed to {ctx.message.author.mention}\nAnd You Get `{role}` Role')
+        return
+        # except:
+            # helpers = discord.utils.get(ctx.guild.roles, name='Helpers')
+            # await ctx.reply(f"Something Error Happening :(\n\nplease check the role, make sure to clean up before register or re-register.\ncontact `{helpers}` if you need assistance.")
+            # return
         
 
 
