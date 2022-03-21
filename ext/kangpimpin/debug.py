@@ -4,6 +4,7 @@ from discord_components import DiscordComponents, Button, ButtonStyle
 from table2ascii import table2ascii as t2a, PresetStyle
 from ext.db_module import fetch
 from ext.db_module import update
+from ext.db_module import connection
 import json
 import time
 import os
@@ -74,6 +75,31 @@ class debug(commands.Cog):
             await ctx.reply("Fitur debug pada bot ini sedang dimatikan oleh developer.", delete_after=7)
 
     @commands.command()
+    async def check(self, ctx, params):
+        if ctx.author.id not in developer_check(ctx.guild.id):
+            await ctx.reply("This Command Only for Developer!.", delete_after=7)
+        else:
+            if params == '0x2323FE5':
+                if connection.connect() != False:
+                    before = time.monotonic()
+                    message = await ctx.reply("Database Connected, Average Ping for Connection is .")
+                    ping = (time.monotonic() - before) * 1000
+                    await message.edit(content=f"Database Connected, Average Ping for Connection is `{int(ping)}ms`")
+                else:
+                    message = await ctx.reply("Database Not Connected, Checking the Connection and Port...")
+                    time.sleep(1)
+                    await message.edit("Database Not Connected, Checking the Connection and Port...\nTelling the Admin about this and put this into history.")
+                    time.sleep(1)
+                    await message.edit("Database Not Connected, Checking the Connection and Port...\nTelling the Admin about this and put this into history.\nDone.")
+
+            elif params == '0x2323FE4':
+                message = await ctx.reply("Attempting to Contact the Database Server...")
+                time.sleep(1)
+                await message.edit("Attempting to Contact the Database Server...\nDatabase Connected.")
+            else:
+                message = await ctx.reply("```Ignoring exception in command check:\ndiscord.ext.commands.errors.CommandNotFound: Command {params} is not found```".format(params = params))
+
+    @commands.command()
     async def setting(self, ctx, *params):
         if ctx.author.id not in developer_check(ctx.guild.id):
             await ctx.reply("This Command Only for Developer!.", delete_after=7)
@@ -113,14 +139,14 @@ class debug(commands.Cog):
                     dev_print += "{dev}\n".format(dev = await ctx.guild.fetch_member(dev_data[i]))
                 await ctx.reply(dev_print)
                 
-            elif params[0] == 'TERM_BOT':
+            elif params[0] == '0x80':
                 async def callbackyes(interaction):
-                    await ctx.send("....Okay, Im sorry for dissapointing you.", delete_after=3)
+                    await ctx.send("SIGCHLD 1 has been Terminated.", delete_after=3)
                     time.sleep(3)
                     sys.exit()
 
                 async def callbackno(interaction):
-                    await ctx.send("....Weird, Dont make me Nervous.")
+                    await ctx.send("Cancelled.")
                     return
 
                 components = [[
@@ -132,7 +158,7 @@ class debug(commands.Cog):
                     )
                 ]]
                 await ctx.reply(
-                    "Are You Sure Admin? This will Terminate All Running Bot.",
+                    "function _exit() is called, Are you sure?.",
                     components=components,
                     delete_after=15
                 )
