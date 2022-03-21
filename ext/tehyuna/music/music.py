@@ -21,8 +21,8 @@ def checkdata(guild_id, guild_dev_id):
     if music_data['value'] == 'TRUE':
         return True
     else:
-        if guild_dev_id in dev_id :
-            return True
+        # if guild_dev_id in dev_id :
+        #     return True
         return False
 
 def checkchannel(guild_id):
