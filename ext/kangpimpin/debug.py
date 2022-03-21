@@ -58,12 +58,8 @@ class debug(commands.Cog):
             header_final = ['type', 'name', 'value']
             data_final = []
             for i in range(len(data)):
-                try:
-                    data_temp = ['{typed}'.format(typed = data['{i}'.format(i = i)]['type']), '{name}'.format(name = await ctx.guild.fetch_member(data['{i}'.format(i = i)]['name'])), '{value}'.format(value = data['{i}'.format(i = i)]['value'])]
-                    data_final.append(data_temp)
-                except:
-                    data_temp = ['{typed}'.format(typed = data['{i}'.format(i = i)]['type']), 'NULL(Probably Exit Server or Delete Account)', '{value}'.format(value = data['{i}'.format(i = i)]['value'])]
-                    data_final.append(data_temp)
+                data_temp = ['{typed}'.format(typed = data['{i}'.format(i = i)]['type']), '{name}'.format(name = await ctx.guild.fetch_member(data['{i}'.format(i = i)]['name'])), '{value}'.format(value = data['{i}'.format(i = i)]['value'])]
+                data_final.append(data_temp)
             output_final = t2a(
                 header=header_final,
                 body=data_final,
