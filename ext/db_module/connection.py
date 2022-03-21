@@ -15,4 +15,3 @@ def connect():
         return db
     else:
         print("Connection Failed!")
-        return False
