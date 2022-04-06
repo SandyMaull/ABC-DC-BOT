@@ -51,8 +51,20 @@ class Register(commands.Cog):
     async def on_message(self, message):
         if not message.author.bot:
             if profanity.contains_profanity(message.content):
+                print(message.content)
+                censored_text = profanity.censor(message.content, '#')
+                hook = await message.channel.create_webhook(name="profanity_hook")
                 await message.delete()
-                await message.channel.send("Hai {author},\nPesan anda telah dihapus...\nTolong perhatikan ketikan anda.".format(author = message.author.mention))
+                await hook.send(
+                    censored_text,
+                    username=message.author.display_name + " | (Profanity Filter)",
+                    avatar_url=message.author.avatar_url,
+                    # allows the webhook message info to be cached
+                    wait=True,
+                )
+                await hook.delete()
+                # await message.edit(content = censored_text)
+                # await message.channel.send("Hai {author},\nPesan anda telah dihapus...\nTolong perhatikan ketikan anda.".format(author = message.author.mention))
 
     async def on_command_error(self, ctx, error):
         if isinstance(error, commands.errors.CheckFailure):
