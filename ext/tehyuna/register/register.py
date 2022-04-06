@@ -72,7 +72,6 @@ class Register(commands.Cog):
         help="*Register khusus untuk dev\n*format yg ada IGN albion: -dreg [Mention yg ingin di register] [nickname] [IGN ALBION]\ncontoh:-dreg @TagDCMamat Mamat Invoker\n\n*format tanpa IGN:-dreg [Mention yg ingin di register] [nickname]\ncontoh: -dreg @TagDCMamat Mamat",
         aliases=["devregister"],
     )
-
     async def dreg(self, ctx, m: discord.Member, *args):
         if ctx.prefix != '-':
             return
