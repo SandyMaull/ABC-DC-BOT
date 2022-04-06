@@ -3,13 +3,12 @@ import discord
 from discord.ext import commands
 import traceback
 import json
+from better_profanity import profanity
 from ext.db_module import fetch, insert
 import sys
-import requests
 import urllib
 
-from random import shuffle
-from youtube_dl import YoutubeDL
+profanity.load_censor_words_from_file("./ext/tehyuna/register/badword.txt")
 
 def checkdata(guild_id):
     regis_db = fetch.one(guild_id, "config", 'name', 'REGISTER')
@@ -49,6 +48,12 @@ class Register(commands.Cog):
         return ctx.prefix == self.prefix
 
     @commands.Cog.listener()
+    async def on_message(self, message):
+        if not message.author.bot:
+            if profanity.contains_profanity(message.content):
+                await message.delete()
+                await message.channel.send("Hai {author},\nPesan anda telah dihapus...\nTolong perhatikan ketikan anda.".format(author = message.author.mention))
+
     async def on_command_error(self, ctx, error):
         if isinstance(error, commands.errors.CheckFailure):
             pass
@@ -274,8 +279,6 @@ class Register(commands.Cog):
             # helpers = discord.utils.get(ctx.guild.roles, name='Helpers')
             # await ctx.reply(f"Something Error Happening :(\n\nplease check the role, make sure to clean up before register or re-register.\ncontact `{helpers}` if you need assistance.")
             # return
-        
-
 
 
 def setup(bot):
