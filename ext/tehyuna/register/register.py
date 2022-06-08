@@ -3,21 +3,18 @@ import discord
 from discord.ext import commands
 import traceback
 import json
-from better_profanity import profanity
 from ext.db_module import fetch, insert
 import sys
-import urllib
+import urllib3
 
-profanity.load_censor_words_from_file("./ext/tehyuna/register/badword.txt")
+http = urllib3.PoolManager(num_pools=3)
 
 def checkdata(guild_id):
     regis_db = fetch.one(guild_id, "config", 'name', 'REGISTER')
     regis_data = json.loads(regis_db)
     if regis_data['value'] == 'TRUE':
         return True
-    else:
-        
-        return False
+    return False
 
 def checkdev(guild_id, guild_dev_id):
     dev_db = fetch.all(guild_id, 'developer')
@@ -25,7 +22,7 @@ def checkdev(guild_id, guild_dev_id):
     dev_id = []
     for i in range(len(dev_data)):
         dev_id.append(int(dev_data["{i}".format(i = i)]["dev_id"]))
-    if guild_dev_id in dev_id :
+    if guild_dev_id in dev_id:
         return True
     return False
 
@@ -37,6 +34,20 @@ def checkchannel(guild_id):
         looping = '{i}'.format(i = i)
         list_channel_allow.append(int(channel_data[looping]['channel_id']))
     return list_channel_allow
+
+def checknick(ign):
+    ign = "https://gameinfo.albiononline.com/api/gameinfo/search?q={ign}".format(ign=ign)
+    while True:
+        try:
+            r = http.request('GET', ign)
+            if r.status == 200:
+                data_ret = json.loads(r.data.decode('utf-8'))
+                break
+        except Exception as ex:
+            print(ex)
+            data_ret = False
+            break
+    return data_ret
     
 
 class Register(commands.Cog):
@@ -46,25 +57,6 @@ class Register(commands.Cog):
 
     async def cog_check(self, ctx):
         return ctx.prefix == self.prefix
-
-    @commands.Cog.listener()
-    async def on_message(self, message):
-        if not message.author.bot:
-            if profanity.contains_profanity(message.content):
-                print(message.content)
-                censored_text = profanity.censor(message.content, '#')
-                hook = await message.channel.create_webhook(name="profanity_hook")
-                await message.delete()
-                await hook.send(
-                    censored_text,
-                    username=message.author.display_name + " | (Profanity Filter)",
-                    avatar_url=message.author.avatar_url,
-                    # allows the webhook message info to be cached
-                    wait=True,
-                )
-                await hook.delete()
-                # await message.edit(content = censored_text)
-                # await message.channel.send("Hai {author},\nPesan anda telah dihapus...\nTolong perhatikan ketikan anda.".format(author = message.author.mention))
 
     async def on_command_error(self, ctx, error):
         if isinstance(error, commands.errors.CheckFailure):
@@ -110,13 +102,13 @@ class Register(commands.Cog):
             ign = args[1]
             await ctx.channel.trigger_typing()
             await ctx.reply(f'Searching for Player {ign}\nMaybe take a while, please be patient.', delete_after=15)
-            fullURL = (f"https://gameinfo.albiononline.com/api/gameinfo/search?q={ign}")
-            print('Searching For Player',ign)
-            data = urllib.request.urlopen(fullURL).read().decode()
+            data = checknick(ign)
+            if not data:
+                await ctx.reply(f"Something Error Happening :(\n\nSomething Error, please contact the Helpers/Developer.")
+                return
             await ctx.channel.trigger_typing()
-            output = json.loads(data)
             try:
-                player = output["players"][0]
+                player = data["players"][0]
             except IndexError:
                 player = 'null' 
             await ctx.channel.trigger_typing()
@@ -216,13 +208,14 @@ class Register(commands.Cog):
             ign = args[1]
             await ctx.channel.trigger_typing()
             await ctx.reply(f'Searching for Player {ign}\nMaybe take a while, please be patient.', delete_after=15)
-            fullURL = (f"https://gameinfo.albiononline.com/api/gameinfo/search?q={ign}")
             print('Searching For Player',ign)
-            data = urllib.request.urlopen(fullURL).read().decode()
+            data = checknick(ign)
+            if not data:
+                await ctx.reply(f"Something Error Happening :(\n\nSomething Error, please contact the Helpers/Developer.")
+                return
             await ctx.channel.trigger_typing()
-            output = json.loads(data)
             try:
-                player = output["players"][0]
+                player = data["players"][0]
             except IndexError:
                 player = 'null' 
             await ctx.channel.trigger_typing()

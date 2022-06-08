@@ -49,7 +49,19 @@ class Music(commands.Cog):
         self.music_queue = []
         self.skip_votes = set()
 
-        self.YDL_OPTIONS = {"format": "bestaudio/best", "yesplaylist": "True"}
+        self.YDL_OPTIONS = {
+            "format": "bestaudio/best", 
+            "yesplaylist": "True",
+            'force-ipv4': True,
+            'cachedir': False,
+            'restrictfilenames': True,
+            'nocheckcertificate': True,
+            'quiet': True,
+            'skip_download': True,
+            # 'extract_flat': True,
+            'default_search': 'auto',
+            'source_address': '0.0.0.0',
+            }
         self.FFMPEG_OPTIONS = {
             "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
             "options": "-vn",
@@ -66,21 +78,26 @@ class Music(commands.Cog):
         if not member.id == self.bot.user.id:
             return
 
-        elif before.channel is None:
-            voice = self.vc
+        else:
             time = 0
             while True:
                 await asyncio.sleep(1)
-                time = time + 1
-                try:
-                    if voice.is_playing:
-                        time = 0
-                    if time == 20:
-                        await voice.disconnect()
-                    if not voice.is_connected():
-                        break
-                except:
-                    continue
+                if self.is_playing:
+                    time = 0
+                else:
+                    time = time + 1
+                    if time == 60:
+                        self.current_song = None
+                        self.music_queue = []
+                        try:
+                            if self.vc.is_connected():
+                                await self.vc.disconnect()
+                                self.vc = ""
+                                break
+                        except AttributeError:
+                            self.vc = ""
+                            break
+            return
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
@@ -94,16 +111,19 @@ class Music(commands.Cog):
     def search_yt(self, item):
         with YoutubeDL(self.YDL_OPTIONS) as ydl:
             ydl.cache.remove()
-            # info2 = ydl.extract_info("ytsearch:%s" % item, download=False)["entries"]
-            # print("info2: ", info2)
-            # return False
-            try:
-                info = ydl.extract_info("ytsearch:%s" % item, download=False)[
-                    "entries"
-                ][0]
-                
-            except Exception:
-                return False
+            link_matches = [ele for ele in ["https://", "http://"] if(ele in item)]
+            if link_matches:
+                try:
+                    info = ydl.extract_info(u"{dataLink}".format(dataLink = item), download=False)
+                    return {
+                        "source": info["formats"][0]["url"],
+                        "title": info["title"],
+                        "song_length": info["duration"],
+                    }
+                except Exception:
+                    return False
+            else:
+                info = ydl.extract_info("ytsearch:%s" % item, download=False)["entries"][0]
         return {
             "source": info["formats"][0]["url"],
             "title": info["title"],
@@ -151,28 +171,6 @@ class Music(commands.Cog):
             self.is_playing = False
             self.current_song = None
 
-    # @commands.command(
-    #     name="p",
-    #     help="Plays a selected song from youtube.",
-    #     aliases=["play"],
-    # )
-    # async def p(self, ctx, *args):
-    #     if ctx.prefix != '!1':
-    #         return
-
-    #     if checkdata(ctx.guild.id, ctx.author.id) != True:
-    #         await ctx.reply("Fitur music pada bot ini sedang dimatikan oleh developer.", delete_after=7)
-    #         return
-
-    #     if ctx.channel.id not in checkchannel(ctx.guild.id):
-    #         dc = int(defaultchannel(ctx.guild.id))
-    #         print(dc)
-    #         await ctx.reply("Untuk menghindari spam, Tolong pergunakan bot ini hanya di text channel <#{dc}>\n\nTerima Kasih Atas Pengertiannya.".format(dc = dc), delete_after=7)
-    #         return
-        
-    #     query = " ".join(args)
-    #     song = self.search_yt(query)
-
     @commands.command(
         name="p",
         help="Plays a selected song from youtube.",
@@ -194,26 +192,36 @@ class Music(commands.Cog):
             return
 
         query = " ".join(args)
-        voice_channel = ctx.author.voice.channel
-        if voice_channel is None:
-            await ctx.reply("Connect to a voice channel!", delete_after=5, mention_author=False)
-        else:
+        try:
+            voice_channel = ctx.author.voice.channel
             if ctx.voice_client:
                 if ctx.voice_client.channel != ctx.author.voice.channel:
-                    await ctx.reply("You're not in same voice with bot, not executing...", delete_after=5, mention_author=False)
+                    await ctx.reply("You're not in same voice with bot, not executing...", mention_author=False)
                     return
+            if not ctx.voice_client and self.is_playing == True:
+                self.is_playing = False
+                self.current_song = None
+                self.music_queue = []
+                self.vc = ""
+                await ctx.reply(
+                    "Please re-enter the command, the bot is still on prepare to singing u a nice music :)", mention_author=False
+                )
+                return
+
             song = self.search_yt(query)
             if type(song) == type(True):
                 await ctx.reply(
-                    "Could not download the song. Incorrect format try another keyword.", delete_after=5, mention_author=False
+                    "Could not download the song. Incorrect format try another keyword. (Playlist not Supported Yet.)", mention_author=False
                 )
             else:
                 await ctx.reply(
-                    f""":headphones: **{song["title"]}** has been added to the queue by {ctx.author.mention}""", delete_after=5, mention_author=False
+                    f""":headphones: **{song["title"]}** has been added to the queue by {ctx.author.mention}""", mention_author=False
                 )
                 self.music_queue.append([song, voice_channel, ctx.author.mention])
                 if self.is_playing == False:
                     await self.play_music(ctx)
+        except AttributeError:
+            await ctx.reply("Connect to a voice channel!", mention_author=False)
 
     @commands.command(
         name="cp",
@@ -383,8 +391,14 @@ class Music(commands.Cog):
             return
 
         if self.vc.is_connected():
-            await ctx.reply("""**Bye Bye **:slight_smile:""", delete_after=5, mention_author=False)
+            if self.vc != "" and self.vc:
+                self.vc.stop()
+            await ctx.reply("""**Bye Bye **:slight_smile:""", mention_author=False)
+            self.is_playing = False
+            self.current_song = None
+            self.music_queue = []
             await self.vc.disconnect(force=True)
+            self.vc = ""
 
     @commands.command(
         name="pn", help="Moves the song to the top of the queue."

@@ -5,10 +5,14 @@ from table2ascii import table2ascii as t2a, PresetStyle
 from ext.db_module import fetch
 from ext.db_module import update
 from ext.db_module import connection
+from dotenv import load_dotenv
 import json
 import time
 import os
 import sys
+import requests
+
+load_dotenv()
 
 def check_config(guild_id):
     debug_db = fetch.one(guild_id, "config", 'name', 'DEBUG')

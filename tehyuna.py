@@ -23,6 +23,7 @@ class TehYuna(commands.Bot):
     def _load_extensions(self) -> None:
         musicModule = os.listdir("ext/tehyuna/music")
         registerModule = os.listdir("ext/tehyuna/register")
+        reactModule = os.listdir("ext/tehyuna/util")
         
         for filename in musicModule:
             if filename.endswith(".py"):
@@ -37,5 +38,13 @@ class TehYuna(commands.Bot):
                 cog = filename[:-3]
                 try:
                     self.load_extension(f"ext.tehyuna.register.{cog}")
+                except Exception as e:
+                    traceback.print_exc()
+
+        for filename in reactModule:
+            if filename.endswith(".py"):
+                cog = filename[:-3]
+                try:
+                    self.load_extension(f"ext.tehyuna.util.{cog}")
                 except Exception as e:
                     traceback.print_exc()
