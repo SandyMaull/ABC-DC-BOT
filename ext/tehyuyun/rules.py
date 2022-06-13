@@ -15,8 +15,9 @@ def ImageFilter(content):
         dataObject = {"url_image":"{link}".format(link = content.url), "API_KEY":"{token}".format(token = os.getenv('I_PP_TOKEN')), "task":"porn_moderation,suggestive_nudity_moderation", "origin_id":"{id}".format(id = content.id), "reference_id":"{name}".format(name = content.filename)}
         result_url = requests.post(os.getenv('I_PP_URL'), data = dataObject)
         result_url = json.loads(result_url.content)
-        if result_url["final_decision"] == 'KO':
-            return True
+        if not result_url["status"] == 'failure':
+            if result_url["final_decision"] == 'KO':
+                return True
     
     elif os.getenv('I_FILTER') == 'SightEngine':
         params = {
