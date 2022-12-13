@@ -5,3 +5,4 @@ Scripts
 .env
 pyvenv.cfg
 requirements_old.txt
+data
