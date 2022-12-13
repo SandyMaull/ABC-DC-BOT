@@ -29,7 +29,6 @@ def run_command(command):
         }
     finally:
         client.close()
-    print(response)
     return response
  
 def status():
