@@ -13,6 +13,7 @@ Port = int(os.getenv('SSH_PORT'))
 def run_command(command):
     try:
         client = paramiko.SSHClient()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         client.load_system_host_keys()
         client.connect(Host, port=Port, username=User, password=Pass, timeout=5)
         (stdin, stdout, stderr) = client.exec_command(command)
