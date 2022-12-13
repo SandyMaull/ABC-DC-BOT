@@ -11,7 +11,7 @@ head = {"Content-Type":"application/x-www-form-urlencoded", "apikey":api_token, 
 
 async def CheckStatus():
     try:
-        response = requests.get(api_url + '/list', headers=head, timeout = 15).json()
+        response = requests.get(api_url + '/list', headers=head, timeout = 18).json()
         response = response[0]['status']
         response = {
             "status": 0,
@@ -28,7 +28,7 @@ async def CheckStatus():
 async def Stop():
     try:
         data = {'uuid': 'bd514e74-adeb-41ee-930a-8b5b4a57cfa9'}
-        response = requests.post(api_url + '/stop', data = data, headers = head, timeout = 15).json()
+        response = requests.post(api_url + '/stop', data = data, headers = head, timeout = 18).json()
         response = response['status']
         response = {
             "status": 0,
@@ -49,7 +49,7 @@ async def Stop():
 async def Start():
     try:
         data = {'uuid': 'bd514e74-adeb-41ee-930a-8b5b4a57cfa9'}
-        response = requests.post(api_url + '/start', data = data, headers = head, timeout = 15).json()
+        response = requests.post(api_url + '/start', data = data, headers = head, timeout = 18).json()
         response = response['status']
         response = {
             "status": 0,

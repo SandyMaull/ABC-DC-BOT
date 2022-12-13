@@ -56,7 +56,7 @@ class Minecraft(commands.Cog):
             ApiConn = json.loads(ApiConn)
             if ApiConn['status'] == 0 and ApiConn['res'] == 'running':
                 await interaction.channel.send("**(3/5)** Server is running, Connecting to Remote Service")
-                time.sleep(15)
+                time.sleep(18)
                 RmtConn = RmtStart()
                 RmtConn = json.loads(RmtConn)
                 if RmtConn['status'] != 0:
