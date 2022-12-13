@@ -1,0 +1,16 @@
+[
+    {
+        "id": 1,
+        "unique_name": "kuro_01",
+        "name": "Kuro",
+        "author": 172496511542755328,
+        "choice": []
+    },
+    {
+        "id": 2,
+        "unique_name": "kuro_02",
+        "name": "Kuro 2",
+        "author": 172496511542755328,
+        "choice": []
+    }
+]
