@@ -20,6 +20,7 @@ class RRole(commands.Cog):
         hcerole = 973681542704537610
         hcelevel = 973681575143305307
         meatshield = 973681604490821682
+        caerleonflag = 1014537328833863721
         if payload.message_id == ava:
             guild = self.client.get_guild(payload.guild_id)
             member = guild.get_member(payload.user_id)
@@ -80,6 +81,17 @@ class RRole(commands.Cog):
             member = guild.get_member(payload.user_id)
             if payload.emoji.name == '🍖':
                 role = discord.utils.get(guild.roles, id=830652030108041236)
+                if role not in member.roles:
+                    await payload.member.add_roles(role)
+                    return
+            else:
+                return
+        elif payload.message_id == caerleonflag:
+            guild = self.client.get_guild(payload.guild_id)
+            member = guild.get_member(payload.user_id)
+            emoji = get(guild.emojis, name="caerleon_flag")
+            if payload.emoji == emoji:
+                role = discord.utils.get(guild.roles, id=1014366445091692554)
                 if role not in member.roles:
                     await payload.member.add_roles(role)
                     return
@@ -94,6 +106,7 @@ class RRole(commands.Cog):
         hcerole = 973681542704537610
         hcelevel = 973681575143305307
         meatshield = 973681604490821682
+        caerleonflag = 1014537328833863721
         if payload.message_id == ava:
             guild = self.client.get_guild(payload.guild_id)
             member = guild.get_member(payload.user_id)
@@ -154,6 +167,17 @@ class RRole(commands.Cog):
             member = guild.get_member(payload.user_id)
             if payload.emoji.name == '🍖':
                 role = discord.utils.get(guild.roles, id=830652030108041236)
+                if role in member.roles:
+                    await member.remove_roles(role)
+                    return
+            else:
+                return
+        elif payload.message_id == caerleonflag:
+            guild = self.client.get_guild(payload.guild_id)
+            member = guild.get_member(payload.user_id)
+            emoji = get(guild.emojis, name="caerleon_flag")
+            if payload.emoji == emoji:
+                role = discord.utils.get(guild.roles, id=1014366445091692554)
                 if role in member.roles:
                     await member.remove_roles(role)
                     return

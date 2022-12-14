@@ -6,8 +6,8 @@ import json
 from ext.db_module import fetch, insert
 import sys
 import urllib3
-
-http = urllib3.PoolManager(num_pools=3)
+timeout = urllib3.util.Timeout(connect=2.0, read=7.0)
+http = urllib3.PoolManager(num_pools=10, timeout=timeout)
 
 def checkdata(guild_id):
     regis_db = fetch.one(guild_id, "config", 'name', 'REGISTER')
@@ -37,16 +37,25 @@ def checkchannel(guild_id):
 
 def checknick(ign):
     ign = "https://gameinfo.albiononline.com/api/gameinfo/search?q={ign}".format(ign=ign)
+    loop = 0
     while True:
         try:
-            r = http.request('GET', ign)
-            if r.status == 200:
-                data_ret = json.loads(r.data.decode('utf-8'))
-                break
+            r = http.request(
+                'GET', 
+                ign, 
+                headers={
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36'
+                }
+            )
+            data_ret = json.loads(r.data.decode('utf-8'))
+            break
         except Exception as ex:
+            loop += 1
             print(ex)
             data_ret = False
-            break
+            if loop == 3:
+                break
+            continue
     return data_ret
     
 
@@ -104,7 +113,7 @@ class Register(commands.Cog):
             await ctx.reply(f'Searching for Player {ign}\nMaybe take a while, please be patient.', delete_after=15)
             data = checknick(ign)
             if not data:
-                await ctx.reply(f"Something Error Happening :(\n\nSomething Error, please contact the Helpers/Developer.")
+                await ctx.reply(f"Something Error Happening :(\nPlease contact the Helpers/Developer.")
                 return
             await ctx.channel.trigger_typing()
             try:
@@ -211,7 +220,7 @@ class Register(commands.Cog):
             print('Searching For Player',ign)
             data = checknick(ign)
             if not data:
-                await ctx.reply(f"Something Error Happening :(\n\nSomething Error, please contact the Helpers/Developer.")
+                await ctx.reply(f"Something Error Happening :(\nPlease contact the Helpers/Developer.")
                 return
             await ctx.channel.trigger_typing()
             try:

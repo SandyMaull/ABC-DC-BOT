@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from discord.utils import get
 from discord_components import DiscordComponents, Button, ButtonStyle
 from table2ascii import table2ascii as t2a, PresetStyle
 from ext.db_module import fetch
@@ -102,6 +103,17 @@ class debug(commands.Cog):
                 await message.edit("Attempting to Contact the Database Server...\nDatabase Connected.")
             else:
                 message = await ctx.reply("```Ignoring exception in command check:\ndiscord.ext.commands.errors.CommandNotFound: Command {params} is not found```".format(params = params))
+
+    # @commands.command()
+    # async def editmessage(self, ctx, msg: int):
+    #     message = await ctx.fetch_message(msg)
+    #     emoji = get(ctx.guild.emojis, name="caerleon_flag")
+    #     embed_caerleon_flag = discord.Embed(
+	# 		title='CAERLEON-RIFFRAFF',
+	# 		description=f'React emote {emoji} dibawah ini agar bisa di notif ketika kami akan capping flag caerleon.',
+	# 		colour=discord.Colour.dark_red()
+    #     )
+    #     await message.edit(embed_caerleon_flag)
 
     @commands.command()
     async def setting(self, ctx, *params):
