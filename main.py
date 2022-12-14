@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import discord
 import asyncio
 from tehyuna import TehYuna
-from tehyuli import TehYuli
+# from tehyuli import TehYuli
 from tehyuyun import TehYuyun
 from kangpimpin import KangPimpin
 from discord_components import DiscordComponents
@@ -15,7 +15,7 @@ load_dotenv()
 def main():
     kangpimpin = KangPimpin()
     tehyuna = TehYuna()
-    tehyuli = TehYuli()
+    # tehyuli = TehYuli()
     tehyuyun = TehYuyun()
 
     @kangpimpin.event
@@ -97,11 +97,11 @@ def main():
     #     embed=discord.Embed(title="Welcome!",description=f"{member.mention} Just Joined")
     #     await channel.send(embed=embed)
 
-    @tehyuli.event
-    async def on_ready():
-        print("We have logged in as {0.user}".format(tehyuli))
-        await tehyuli.change_presence(activity=discord.Game("Price Checker"))
-        DiscordComponents(tehyuli)
+    # @tehyuli.event
+    # async def on_ready():
+    #     print("We have logged in as {0.user}".format(tehyuli))
+    #     await tehyuli.change_presence(activity=discord.Game("Price Checker"))
+    #     DiscordComponents(tehyuli)
 
     @tehyuyun.event
     async def on_ready():
@@ -112,7 +112,7 @@ def main():
     loop = asyncio.get_event_loop()
     loop.create_task(kangpimpin.start(os.getenv("KP_TOKEN")))
     loop.create_task(tehyuna.start(os.getenv("TYA_TOKEN")))
-    loop.create_task(tehyuli.start(os.getenv("TYI_TOKEN")))
+    # loop.create_task(tehyuli.start(os.getenv("TYI_TOKEN")))
     loop.create_task(tehyuyun.start(os.getenv("TYY_TOKEN")))
     loop.run_forever()
 
